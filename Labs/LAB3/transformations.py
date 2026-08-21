@@ -18,6 +18,9 @@ original_points = []
 circle_center = (0, 0)
 circle_radius = 1
 
+original_circle_center = (0, 0)
+original_circle_radius = 1
+
 window_width = 800
 window_height = 800
 
@@ -75,16 +78,24 @@ def draw_graph():
 
 
 # ============================================================
-# DRAW SHAPE
+# DRAW SHAPE (blue = original, red = changed)
 # ============================================================
 
 def draw_shape():
 
-    glColor3f(0.0, 0.0, 1.0)
-    glLineWidth(2)
-
     if shape in ("triangle", "square", "rectangle"):
 
+        # Original - blue
+        glColor3f(0.0, 0.0, 1.0)
+        glLineWidth(2)
+        glBegin(GL_LINE_LOOP)
+        for x, y in original_points:
+            glVertex2f(x, y)
+        glEnd()
+
+        # Changed - red
+        glColor3f(1.0, 0.0, 0.0)
+        glLineWidth(2)
         glBegin(GL_LINE_LOOP)
         for x, y in points:
             glVertex2f(x, y)
@@ -92,8 +103,22 @@ def draw_shape():
 
     elif shape == "circle":
 
-        cx, cy = circle_center
+        # Original - blue
+        ocx, ocy = original_circle_center
+        glColor3f(0.0, 0.0, 1.0)
+        glLineWidth(2)
+        glBegin(GL_LINE_LOOP)
+        for i in range(100):
+            angle = 2 * math.pi * i / 100
+            x = ocx + original_circle_radius * math.cos(angle)
+            y = ocy + original_circle_radius * math.sin(angle)
+            glVertex2f(x, y)
+        glEnd()
 
+        # Changed - red
+        cx, cy = circle_center
+        glColor3f(1.0, 0.0, 0.0)
+        glLineWidth(2)
         glBegin(GL_LINE_LOOP)
         for i in range(100):
             angle = 2 * math.pi * i / 100
@@ -103,6 +128,19 @@ def draw_shape():
         glEnd()
 
     glLineWidth(1)
+
+
+# ============================================================
+# LEGEND
+# ============================================================
+
+def draw_legend():
+
+    glColor3f(0.0, 0.0, 1.0)
+    draw_text(-9.5, 9.3, "Blue: Original")
+
+    glColor3f(1.0, 0.0, 0.0)
+    draw_text(-9.5, 8.7, "Red: Changed")
 
 
 # ============================================================
@@ -118,6 +156,7 @@ def display():
 
     draw_graph()
     draw_shape()
+    draw_legend()
 
     glutSwapBuffers()
 
@@ -200,6 +239,7 @@ def create_circle():
 
     return []
 
+
 # ============================================================
 # SELECT SHAPE
 # ============================================================
@@ -207,6 +247,7 @@ def create_circle():
 def select_shape():
 
     global shape, points, original_points
+    global original_circle_center, original_circle_radius
 
     print("\n================================")
     print("          SELECT SHAPE")
@@ -234,6 +275,8 @@ def select_shape():
         shape = "circle"
         points = create_circle()
         original_points = points.copy()
+        original_circle_center = circle_center
+        original_circle_radius = circle_radius
     else:
         print("Invalid choice.")
         return False
@@ -353,12 +396,13 @@ def reflection():
 
 def reset():
 
-    global points, circle_center
+    global points, circle_center, circle_radius
 
     points = original_points.copy()
 
     if shape == "circle":
-        circle_center = (0, 0)
+        circle_center = original_circle_center
+        circle_radius = original_circle_radius
 
     print("Shape reset to original position.")
 
